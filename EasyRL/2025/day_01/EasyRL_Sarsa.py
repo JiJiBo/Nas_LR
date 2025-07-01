@@ -27,10 +27,10 @@ class QL_Agent:
         return state
 
     def learn(self):
-        for i in range(2000):
-            data = self.pool.sample(1)
-            state, action, reward, next_state, over = data[0]
-            next_action = np.argmax(self.Q_table[next_state])
+        datas = self.pool.sample(64)
+        for data in datas:
+
+            state, action, reward, next_state, over, next_action = data
             if over:
                 target = reward
             else:
@@ -140,19 +140,22 @@ def run_one_episode(agent, is_train=True):
     total_reward = 0
     total_step = 0
     over = False
+    action = agent.sample_action(state, is_train)
     while not over:
-        action = agent.sample_action(state, is_train)
+
         next_state, reward, over = agent.env.step(action)
-        agent.pool.append([state, action, reward, next_state, over])
+        next_action = agent.sample_action(next_state, is_train)
+        agent.pool.append([state, action, reward, next_state, over, next_action])
         total_reward += reward
         total_step += 1
         state = next_state
+        action = next_action
         if not is_train:
-            sleep(1)
+            sleep(0.2)
             agent.env.show()
     return total_reward, total_step
 
 
 if __name__ == '__main__':
-    # train()
+    train()
     test()
