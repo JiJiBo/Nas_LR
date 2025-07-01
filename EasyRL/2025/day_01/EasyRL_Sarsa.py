@@ -38,12 +38,12 @@ class QL_Agent:
             self.Q_table[state, action] += 0.1 * (target - self.Q_table[state, action])
 
     def save(self):
-        npy_file = './q_table.npy'
+        npy_file = './q_table_sarsa.npy'
         np.save(npy_file, self.Q_table)
         print(npy_file + ' saved.')
 
     def load(self):
-        npy_file = './q_table.npy'
+        npy_file = './q_table_sarsa.npy'
         self.Q_table = np.load(npy_file)
         print(npy_file + ' loaded.')
 
