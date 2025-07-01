@@ -26,12 +26,27 @@ class QL_Agent:
         return state
 
     def learn(self):
-        pass
+        for i in range(2000):
+            data = self.pool.sample(1)
+            state, action, reward, next_state, over = data[0]
+            next_action = np.argmax(self.Q_table[next_state])
+            if over:
+                target = reward
+            else:
+                target = reward + 0.9 * self.Q_table[next_state, next_action]
+            self.Q_table[state, action] += 0.1 * (target - self.Q_table[state, action])
+
+    def sample_action(self, state):
+        if np.random.uniform(0, 1) < 0.01:
+            action = np.random.randint(0, self.act_num)
+        else:
+            action = np.argmax(self.Q_table[state])
+        return action
 
 
 # 数据池
 class DataPool:
-    def __init__(self, max_len=2000):
+    def __init__(self, max_len=20000):
         self.memery = []
         self.max_len = max_len
 
@@ -76,7 +91,9 @@ class NasWapper(gym.Wrapper):
         state, reward, terminated, truncated, info = self.env.step(action)
         # 计算是否结束此次回合
         over = terminated or truncated
-
+        self.step_n += 1
+        if self.step_n >= 200:
+            over = True
         return state, reward, over
 
     def show(self):
@@ -91,14 +108,17 @@ def train():
     # 实例化一个agent
     agent = QL_Agent()
     agent.train = True
-    for i in tqdm.tqdm(range(1000)):
+    des = tqdm.tqdm(range(4000))
+    for i in des:
         r, _ = run_one_episode(agent, is_train=True)
+        des.set_description(f"episode:{i}, reward:{r}")
         agent.learn()
-        print(f"第{i + 1}次回报: {r}")
 
 
 def test():
-    pass
+    agent = QL_Agent()
+    agent.train = False
+    run_one_episode(agent, is_train=False)
 
 
 def run_one_episode(agent, is_train=True):
@@ -108,7 +128,7 @@ def run_one_episode(agent, is_train=True):
     total_step = 0
     over = False
     while not over:
-        action = agent.Q_table[state].argmax()
+        action = agent.sample_action(state)
         next_state, reward, over = agent.env.step(action)
         agent.pool.append([state, action, reward, next_state, over])
         total_reward += reward
@@ -121,3 +141,4 @@ def run_one_episode(agent, is_train=True):
 
 if __name__ == '__main__':
     train()
+    test()
