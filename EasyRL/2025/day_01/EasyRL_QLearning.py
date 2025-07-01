@@ -124,7 +124,7 @@ def train():
     # 实例化一个agent
     agent = QL_Agent()
     agent.train = True
-    des = tqdm.tqdm(range(4000))
+    des = tqdm.tqdm(range(1000))
     for i in des:
         for j in range(64):
             r, _ = run_one_episode(agent, is_train=True)
