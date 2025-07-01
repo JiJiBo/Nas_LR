@@ -14,7 +14,8 @@ from torch import nn
 # 智能体
 class QL_Agent:
     def __init__(self):
-        pass
+        self.pool = DataPool()
+        self.env = NasWapper()
 
 
 # 数据池
