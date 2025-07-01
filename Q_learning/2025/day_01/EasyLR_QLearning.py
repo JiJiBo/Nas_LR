@@ -17,6 +17,16 @@ class QL_Agent:
         self.pool = DataPool()
         self.env = NasWapper()
         self.train = train
+        self.box_num = self.env.env.observation_space.n
+        self.act_num = self.env.env.action_space.n
+        self.Q_table = np.zeros((self.box_num, self.act_num))
+
+    def reset(self):
+        state = self.env.reset()
+        return state
+
+    def learn(self):
+        pass
 
 
 # 数据池
@@ -78,16 +88,35 @@ class NasWapper(gym.Wrapper):
 
 
 def train():
+    # 实例化一个agent
     agent = QL_Agent()
     agent.train = True
+    for i in tqdm.tqdm(range(1000)):
+        r, _ = run_one_episode(agent, is_train=True)
+        agent.learn()
+        print(f"第{i + 1}次回报: {r}")
 
 
 def test():
     pass
 
 
-def run_one_episode(is_train=True):
-    pass
+def run_one_episode(agent, is_train=True):
+    # 初始化环境
+    state = agent.reset()
+    total_reward = 0
+    total_step = 0
+    over = False
+    while not over:
+        action = agent.Q_table[state].argmax()
+        next_state, reward, over = agent.env.step(action)
+        agent.pool.append([state, action, reward, next_state, over])
+        total_reward += reward
+        total_step += 1
+        state = next_state
+        if not is_train:
+            agent.env.show()
+    return total_reward, total_step
 
 
 if __name__ == '__main__':
