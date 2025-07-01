@@ -157,5 +157,5 @@ def run_one_episode(agent, is_train=True):
 
 
 if __name__ == '__main__':
-    train()
+    # train()
     test()
