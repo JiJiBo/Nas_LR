@@ -2,6 +2,7 @@ import copy
 import os.path
 import random
 from collections import deque
+from time import sleep
 
 import cv2
 import gym
@@ -46,8 +47,8 @@ class QL_Agent:
         self.Q_table = np.load(npy_file)
         print(npy_file + ' loaded.')
 
-    def sample_action(self, state):
-        if np.random.uniform(0, 1) < 0.01:
+    def sample_action(self, state, is_train):
+        if np.random.uniform(0, 1) < 0.01 and is_train:
             action = np.random.randint(0, self.act_num)
         else:
             action = np.argmax(self.Q_table[state])
@@ -125,6 +126,7 @@ def train():
         agent.learn()
     agent.save()
 
+
 def test():
     agent = QL_Agent()
     agent.train = False
@@ -139,17 +141,18 @@ def run_one_episode(agent, is_train=True):
     total_step = 0
     over = False
     while not over:
-        action = agent.sample_action(state)
+        action = agent.sample_action(state, is_train)
         next_state, reward, over = agent.env.step(action)
         agent.pool.append([state, action, reward, next_state, over])
         total_reward += reward
         total_step += 1
         state = next_state
         if not is_train:
+            sleep(1)
             agent.env.show()
     return total_reward, total_step
 
 
 if __name__ == '__main__':
-    train()
+    # train()
     test()
