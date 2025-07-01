@@ -69,7 +69,7 @@ class DataPool:
         self.memery = self.memery[-self.max_len:]
 
     def sample(self, size=64):
-        return random.sample(self.memery, size)
+        return self.memery[-size:]
 
 
 # 一个 CliffWalking 环境
