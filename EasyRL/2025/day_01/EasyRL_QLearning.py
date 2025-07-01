@@ -25,7 +25,6 @@ class QL_Agent:
 
     def reset(self):
         state = self.env.reset()
-        self.pool.clear()
         return state
 
     def learn(self):
@@ -36,7 +35,7 @@ class QL_Agent:
             if over:
                 target = reward
             else:
-                target = reward + 0.9 * self.Q_table[next_state].argmax()
+                target = reward + 0.9 * np.max(self.Q_table[next_state])
             self.Q_table[state, action] += 0.1 * (target - self.Q_table[state, action])
 
     def save(self):
@@ -73,9 +72,6 @@ class DataPool:
     def sample(self, size=64):
         return random.sample(self.memery, size)
 
-    def clear(self):
-        self.memery = []
-
 
 # 一个 CliffWalking 环境
 class NasWapper(gym.Wrapper):
@@ -108,7 +104,7 @@ class NasWapper(gym.Wrapper):
         # 计算是否结束此次回合
         over = terminated or truncated
         self.step_n += 1
-        if self.step_n >= 200:
+        if self.step_n >= 500:
             over = True
         return state, reward, over
 
@@ -126,9 +122,8 @@ def train():
     agent.train = True
     des = tqdm.tqdm(range(1000))
     for i in des:
-        for j in range(64):
-            r, _ = run_one_episode(agent, is_train=True)
-            des.set_description(f"episode:{i}, reward:{r}")
+        r, _ = run_one_episode(agent, is_train=True)
+        des.set_description(f"episode:{i}, reward:{r}")
         agent.learn()
     agent.save()
 
