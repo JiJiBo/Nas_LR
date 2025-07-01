@@ -13,9 +13,10 @@ from torch import nn
 
 # 智能体
 class QL_Agent:
-    def __init__(self):
+    def __init__(self, train=True):
         self.pool = DataPool()
         self.env = NasWapper()
+        self.train = train
 
 
 # 数据池
@@ -77,7 +78,8 @@ class NasWapper(gym.Wrapper):
 
 
 def train():
-    pass
+    agent = QL_Agent()
+    agent.train = True
 
 
 def test():
@@ -89,4 +91,4 @@ def run_one_episode(is_train=True):
 
 
 if __name__ == '__main__':
-    pass
+    train()
