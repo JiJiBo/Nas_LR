@@ -121,8 +121,9 @@ def train():
     agent.train = True
     des = tqdm.tqdm(range(4000))
     for i in des:
-        r, _ = run_one_episode(agent, is_train=True)
-        des.set_description(f"episode:{i}, reward:{r}")
+        for j in range(64):
+            r, _ = run_one_episode(agent, is_train=True)
+            des.set_description(f"episode:{i}, reward:{r}")
         agent.learn()
     agent.save()
 

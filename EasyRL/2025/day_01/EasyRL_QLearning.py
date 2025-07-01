@@ -9,6 +9,7 @@ import gym
 import numpy as np
 import torch
 import tqdm
+from pygame.event import clear
 from torch import nn
 
 
@@ -24,6 +25,7 @@ class QL_Agent:
 
     def reset(self):
         state = self.env.reset()
+        self.pool.clear()
         return state
 
     def learn(self):
@@ -70,6 +72,9 @@ class DataPool:
 
     def sample(self, size=64):
         return random.sample(self.memery, size)
+
+    def clear(self):
+        self.memery = []
 
 
 # 一个 CliffWalking 环境
@@ -121,8 +126,9 @@ def train():
     agent.train = True
     des = tqdm.tqdm(range(4000))
     for i in des:
-        r, _ = run_one_episode(agent, is_train=True)
-        des.set_description(f"episode:{i}, reward:{r}")
+        for j in range(64):
+            r, _ = run_one_episode(agent, is_train=True)
+            des.set_description(f"episode:{i}, reward:{r}")
         agent.learn()
     agent.save()
 
