@@ -25,8 +25,8 @@ class FlappyBirdEnv(gym.Env):
         return self._get_obs(), reward, done, {}
 
     def _get_obs(self):
-        bx, by = self.p.game.getBirdPos()
-        px, py = self.p.game.getNextPipePos()
-        vy = self.p.game.getPlayerVelY()
+        bx, by = self.p.game.getBirdPos()  # 小鸟在画面中的 (x,y) 像素坐标
+        px, py = self.p.game.getNextPipePos()  # 下一个水管顶端/底端的 (x,y) 坐标
+        vy = self.p.game.getPlayerVelY()  # 小鸟当前的垂直速度（像素/帧）
         # 归一化
         return [(px - bx) / 288, (py - by) / 512, (vy + 10) / 20]
