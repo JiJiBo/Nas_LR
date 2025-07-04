@@ -22,19 +22,34 @@ class FlappyBirdGymEnv(gym.Env):
         self.dt = int(1000 / fps)
 
     def reset(self, *, seed=None, options=None):
-        super().reset(seed=seed,options=options)
+        super().reset(seed=seed, options=options)
         self.game.init()
+        self.prev_score = 0
         return self._dict_to_obs(self.game.getGameState())
 
     def step(self, action):
         if action == 1:
             self.game.player.flap()
         self.game.step(self.dt)
-        d      = self.game.getGameState()
-        obs    = self._dict_to_obs(d)
-        reward = self.game.rewards.get("tick", 0.0)
-        done   = self.game.game_over()
-        info   = {"score": self.game.getScore()}
+
+        d = self.game.getGameState()
+        obs = self._dict_to_obs(d)
+
+        # —— 1) 得分增量奖励 ——
+        current_score = self.game.getScore()
+        score_reward = current_score - self.prev_score
+        self.prev_score = current_score
+
+        # —— 2) 生存奖励（可选）——
+        survival_reward = 0.01
+
+        # —— 3) 死亡惩罚 ——
+        done = self.game.game_over()
+        death_penalty = -1.0 if done else 0.0
+
+        reward = score_reward + survival_reward + death_penalty
+
+        info = {"score": current_score}
         # 新增 truncated=False，让返回值凑成 5 元组
         return obs, reward, done, False, info
 

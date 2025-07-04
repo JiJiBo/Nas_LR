@@ -4,7 +4,7 @@ from PLE.FlappyBirdEnv import FlappyBirdGymEnv
 from PLE.SB3CompatWrapper import SB3CompatWrapper
 
 vec_env = SB3CompatWrapper(FlappyBirdGymEnv())
-model = PPO.load("./logs/best_model.zip", env=vec_env)
+model = PPO.load("./logs/best_model/best_model.zip", env=vec_env)
 
 # 6. 交互式运行一集
 obs, _ = vec_env.reset()
