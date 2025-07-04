@@ -13,7 +13,7 @@ if os.path.exists("./logs/ppo_flappybird.zip"):
     # 注意：PPO.load 返回一个新模型，需要赋值给 model
     model = PPO.load("./logs/ppo_flappybird.zip", env=vec_env, tensorboard_log="./logs/")
 else:
-    model = PPO("MlpPolicy", vec_env, verbose=1, tensorboard_log="./logs/")
+    model = PPO("MlpPolicy", vec_env, verbose=1000, tensorboard_log="./logs/")
 
 eval_callback = EvalCallback(
     vec_env,
