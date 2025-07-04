@@ -1,45 +1,41 @@
 import gym, pygame, numpy as np
+
 from ple.games.flappybird import FlappyBird
+
 
 class FlappyBirdGymEnv(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"]}
 
     def __init__(self, width=288, height=512, pipe_gap=100, fps=30):
         super().__init__()
-        # —— 一定要先 init Pygame ——
         pygame.init()
-
-        # 1. 游戏实例 + 屏幕
         self.game = FlappyBird(width, height, pipe_gap)
-        self.game.rng    = np.random.RandomState()
-        # 让 PLE 在真实窗口里绘制
+        self.game.rng = np.random.RandomState()
         self.game.screen = pygame.display.set_mode((width, height))
 
-        # 2. 定义空间
         self.action_space = gym.spaces.Discrete(2)
-        low  = np.array([0, -np.inf, 0, 0, 0, 0, 0, 0], dtype=np.float32)
+        low = np.array([0, -np.inf, 0, 0, 0, 0, 0, 0], dtype=np.float32)
         high = np.array([height, np.inf, width, height, height, width, height, height], dtype=np.float32)
         self.observation_space = gym.spaces.Box(low, high, dtype=np.float32)
 
-        # 帧率 & 每步 dt（毫秒，int）
         self.fps = fps
-        self.dt  = int(1000 / fps)
+        self.dt = int(1000 / fps)
 
     def reset(self, *, seed=None, options=None):
-        super().reset(seed=seed)
+        super().reset(seed=seed,options=options)
         self.game.init()
-        obs = self._dict_to_obs(self.game.getGameState())
-        return obs, {}
+        return self._dict_to_obs(self.game.getGameState())
 
     def step(self, action):
         if action == 1:
             self.game.player.flap()
         self.game.step(self.dt)
-        d = self.game.getGameState()
+        d      = self.game.getGameState()
         obs    = self._dict_to_obs(d)
         reward = self.game.rewards.get("tick", 0.0)
         done   = self.game.game_over()
         info   = {"score": self.game.getScore()}
+        # 新增 truncated=False，让返回值凑成 5 元组
         return obs, reward, done, False, info
 
     def render(self, mode="human"):
