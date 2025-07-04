@@ -15,9 +15,14 @@ class FlappyBirdEnv(gym.Env):
             low=0, high=1, shape=(3,), dtype=float
         )
 
-    def reset(self):
+    def reset(self, *, seed: int = None, options: dict = None):
+        # 如果你想支持随机种子：
+        super().reset(seed=seed)
+        # 重置游戏
         self.p.reset_game()
-        return self._get_obs()
+        obs = self._get_obs()
+        # Gym 新版要求返回 (obs, info)
+        return obs, {}
 
     def step(self, action):
         reward = self.p.act(1 if action == 1 else None)
