@@ -12,6 +12,7 @@ if __name__ == '__main__':
         env.render("human")
         # 每帧等待一下，保持约 fps
         sleep(1.0 / env.fps)
+        print(f'reward {r}')
         if done:
             print("Game Over, score=", info["score"])
             obs, _ = env.reset()
