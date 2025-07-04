@@ -11,9 +11,9 @@ vec_env = SB3CompatWrapper(FlappyBirdGymEnv())
 # 2. 加载或新建模型
 if os.path.exists("./logs/ppo_flappybird.zip"):
     # 注意：PPO.load 返回一个新模型，需要赋值给 model
-    model = PPO.load("./logs/ppo_flappybird.zip", env=vec_env)
+    model = PPO.load("./logs/ppo_flappybird.zip", env=vec_env, tensorboard_log="./logs/")
 else:
-    model = PPO("MlpPolicy", vec_env, verbose=1)
+    model = PPO("MlpPolicy", vec_env, verbose=1, tensorboard_log="./logs/")
 
 eval_callback = EvalCallback(
     vec_env,
@@ -24,7 +24,7 @@ eval_callback = EvalCallback(
 
 )
 
-model.learn(total_timesteps=5_000_000, callback=eval_callback)
+model.learn(total_timesteps=5_000_000, callback=eval_callback, tb_log_name="PPO-FlappyBird")
 
 # 4. 保存
 model.save("./logs/ppo_flappybird")
