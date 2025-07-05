@@ -3,6 +3,7 @@ from typing import Optional
 import gymnasium as gym
 import numpy as np
 import gym_super_mario_bros
+from gym.wrappers import GrayScaleObservation, ResizeObservation
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
@@ -21,12 +22,13 @@ class SuperMarioBrosEnv(gym.Env):
         super().__init__()
         # 创建原始环境并只保留 SIMPLE_MOVEMENT 动作集
         env = gym_super_mario_bros.make(
-            'SuperMarioBros-1-1-v0',
+            'SuperMarioBros-1-1-v3',
             render_mode='rgb_array',  # 或 'human'
             apply_api_compatibility=True
         )
         self.env = JoypadSpace(env, SIMPLE_MOVEMENT)
-
+        self.env = GrayScaleObservation(self.env, keep_dim=True)
+        self.env = ResizeObservation(self.env, shape=(84, 84))
         self.action_space = gym.spaces.discrete.Discrete(self.env.action_space.n)
 
         # 观测空间：取原始像素（H, W, C）

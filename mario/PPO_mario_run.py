@@ -14,7 +14,7 @@ env = VecTransposeImage(env)
 env = VecFrameStack(env, n_stack=4)
 
 # 2. 加载模型时用 custom_objects “挂钩” 无法反序列化的部分
-model_path = "/Users/nas/Downloads/ppo_mario_checkpoint_19200_steps.zip"
+model_path = "/Users/nas/Downloads/ppo_mario_checkpoint_388800_steps.zip"
 custom_objects = {
     # 覆盖空间检测
     "observation_space": env.observation_space,
@@ -24,11 +24,18 @@ custom_objects = {
     "clip_range": lambda _: 0.2,
 }
 
-model = PPO.load(
-    model_path,
+model = PPO(
+    policy="CnnPolicy",
     env=env,
-    device="cpu",
-    custom_objects=custom_objects,
+    verbose=1,
+    tensorboard_log="./logs/",
+    learning_rate=3e-4,
+    n_steps=256,
+    batch_size=2048,
+    n_epochs=10,
+    gamma=0.99,
+    clip_range=0.2,
+    ent_coef=0.01,
 )
 
 # 3. 评估

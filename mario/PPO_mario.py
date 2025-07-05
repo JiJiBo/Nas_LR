@@ -1,5 +1,7 @@
 import os
+import time
 
+from gym.wrappers import GrayScaleObservation
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import (
     EvalCallback,
@@ -11,7 +13,7 @@ from stable_baselines3.common.vec_env import (
     DummyVecEnv,
     VecMonitor,
     VecFrameStack,
-    VecTransposeImage,
+    VecTransposeImage, SubprocVecEnv,
 )
 
 from mario.make_env import SuperMarioBrosEnv
@@ -47,7 +49,8 @@ def train_mario():
     eval_env = VecMonitor(eval_env)
     eval_env = VecFrameStack(eval_env, n_stack=4)
     eval_env = VecTransposeImage(eval_env)
-
+    time_str = time.strftime("%Y%m%d-%H%M%S")
+    tensorboard_log = f"/root/tf-logs/time_{time_str}"
     # —— 2. 模型加载或新建 ——
     model_path = "./logs/ppo_mario.zip"
     if os.path.exists(model_path):
@@ -56,22 +59,22 @@ def train_mario():
             env=train_env,
             device="cuda",
             batch_size=2048,
-            tensorboard_log="./logs/"
+            tensorboard_log=tensorboard_log
         )
     else:
         model = PPO(
             policy="CnnPolicy",
             env=train_env,
             verbose=1,
-            tensorboard_log="./logs/",
+            tensorboard_log=tensorboard_log,
             learning_rate=2.5e-4,  # 初始学习率，可配合线性衰减
             n_steps=128,  # 每个环境 rollout 128 步
             batch_size=256,  # minibatch 大小
             n_epochs=4,  # 每次更新迭代 4 个 epoch
-            gamma=0.99,  # 折扣因子
+            gamma=0.95,  # 折扣因子
             gae_lambda=0.95,  # GAE 参数
             clip_range=0.1,  # PPO 裁剪范围
-            ent_coef=0.01,  # 熵系数，防止过早收敛
+            ent_coef=0.1,  # 熵系数，防止过早收敛
             vf_coef=0.5,  # 价值损失系数
             max_grad_norm=0.5,  # 梯度裁剪上限
             target_kl=0.03,  # 达到 KL 上限时提前停止该次更新
@@ -93,7 +96,7 @@ def train_mario():
         end_coef=0.005,
         decay_steps=2_000_000
     )
-    rollout_save_freq = 300
+    rollout_save_freq = 3000
     checkpoint_cb = CheckpointCallback(
         save_freq=rollout_save_freq,
         save_path="../autodl-tmp/checkpoints_3/",  # 保存目录
