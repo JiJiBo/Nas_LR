@@ -99,6 +99,7 @@ class SuperMarioBrosEnv(gym.Env):
         if mode == "human":
             # 直接显示
             import cv2
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             cv2.imshow("YourEnv", frame)
             cv2.waitKey(1)
         elif mode == "rgb_array":
