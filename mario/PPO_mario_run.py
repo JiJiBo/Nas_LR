@@ -1,41 +1,35 @@
 import os
-
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecTransposeImage, VecFrameStack
-
 from mario.make_env import SuperMarioBrosEnv
 
 
-# 1. 保持和训练时相同的 make_env
+# —— 1. 保持和训练时相同的 make_env
 def make_mario_env():
     return SuperMarioBrosEnv()
 
 
-# 2. 用 DummyVecEnv 包装—even for a single env
-test_env = DummyVecEnv([make_mario_env])
+# —— 2. 包装环境
+env = DummyVecEnv([make_mario_env])
+# 2.1 HWC → CHW
+env = VecTransposeImage(env)
+# 2.2 堆叠 4 帧
+env = VecFrameStack(env, n_stack=4)
 
-# 3. HWC→CHW
-# test_env = VecTransposeImage(test_env)
-
-# 4. 堆叠 4 帧
-test_env = VecFrameStack(test_env, n_stack=4)
-
-# 5. reset() 会得到 shape = (1, 12, 240, 256)
-obs = test_env.reset()
+# —— 3. 重置
+obs = env.reset()
 done = [False]
-# —— 3. 模型加载或新建 ——
-model_path = "./logs/ppo_mario.zip"
+score = None
+
+# —— 4. 加载或新建模型
+model_path = "/Users/nas/Downloads/ppo_mario_checkpoint_14400_steps.zip"
 if os.path.exists(model_path):
-    model = PPO.load(
-        model_path,
-        env=test_env,
-        batch_size=2048,
-        tensorboard_log="./logs/"
-    )
+    # 在 load 时传入 env 以验证空间一致性
+    model = PPO.load(model_path, env=env)
 else:
     model = PPO(
         policy="CnnPolicy",
-        env=test_env,
+        env=env,
         verbose=1,
         tensorboard_log="./logs/",
         learning_rate=3e-4,
@@ -47,10 +41,14 @@ else:
         ent_coef=0.01,
     )
 
+# —— 5. 评估循环
 while not done[0]:
     action, _states = model.predict(obs, deterministic=True)
-    obs, rewards, done, infos = test_env.step(action)
-    # VecEnv 没有直接 render，要下钻到第 0 个 env
-    test_env.envs[0].render()
-    print("测试结束，最终得分：", rewards)
-print("测试结束，最终得分：", infos[-1].get("score", None))
+    obs, rewards, dones, infos = env.step(action)
+    done = dones
+    score = infos[0].get("score", None)
+    # 渲染底层单环境
+    env.venv.envs[0].render()
+
+# —— 6. 输出最终得分
+print("本次测试最终得分：", score)
