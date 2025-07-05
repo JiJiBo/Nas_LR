@@ -21,7 +21,7 @@ class SuperMarioBrosEnv(gym.Env):
         super().__init__()
         # 创建原始环境并只保留 SIMPLE_MOVEMENT 动作集
         env = gym_super_mario_bros.make(
-            'SuperMarioBros-1-1-v0',
+            'SuperMarioBros-1-1-v3',
             render_mode='rgb_array',  # 或 'human'
             apply_api_compatibility=True
         )
