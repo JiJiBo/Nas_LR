@@ -1,3 +1,5 @@
+import os
+
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecTransposeImage, VecFrameStack
 
@@ -21,18 +23,30 @@ test_env = VecFrameStack(test_env, n_stack=4)
 # 5. reset() 会得到 shape = (1, 12, 240, 256)
 obs = test_env.reset()
 done = [False]
-model = PPO(
-    policy="CnnPolicy",
-    env=test_env,
-    verbose=1,
-    tensorboard_log="./logs/",
-    learning_rate=2.5e-4,
-    n_steps=128,
-    batch_size=64,
-    n_epochs=4,
-    gamma=0.99,
-    clip_range=0.1
-)
+# —— 3. 模型加载或新建 ——
+model_path = "./logs/ppo_mario.zip"
+if os.path.exists(model_path):
+    model = PPO.load(
+        model_path,
+        env=test_env,
+        batch_size=2048,
+        tensorboard_log="./logs/"
+    )
+else:
+    model = PPO(
+        policy="CnnPolicy",
+        env=test_env,
+        verbose=1,
+        tensorboard_log="./logs/",
+        learning_rate=3e-4,
+        n_steps=256,
+        batch_size=2048,
+        n_epochs=10,
+        gamma=0.99,
+        clip_range=0.2,
+        ent_coef=0.01,
+    )
+
 while not done[0]:
     action, _states = model.predict(obs, deterministic=True)
     obs, rewards, done, infos = test_env.step(action)
@@ -40,4 +54,3 @@ while not done[0]:
     test_env.envs[0].render()
     print("测试结束，最终得分：", rewards)
 print("测试结束，最终得分：", infos[0].get("score", None))
-
