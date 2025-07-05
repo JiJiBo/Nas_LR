@@ -52,7 +52,7 @@ class SuperMarioBrosEnv(gym.Env):
             obs = result
         # 重置内部状态
         self.prev_score = 0
-        return obs,{}
+        return obs, {}
 
     def step(self, action):
         """
@@ -89,9 +89,9 @@ class SuperMarioBrosEnv(gym.Env):
         human：实时窗口；rgb_array：返回像素数组
         """
         if mode == 'human':
-            return self.env.render(mode='human')
+            return self.env.render()
         elif mode == 'rgb_array':
-            frame = self.env.render(mode='rgb_array')
+            frame = self.env.render()
             return frame
 
     def close(self):
