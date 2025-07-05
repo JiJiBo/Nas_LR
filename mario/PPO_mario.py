@@ -105,7 +105,7 @@ def train_mario():
 
     # —— 4. 训练 ——
     model.learn(
-        total_timesteps=5_000_000,
+        total_timesteps=70_000_000,
         callback=[checkpoint_cb, eval_callback],
         tb_log_name="PPO-Mario-16env"
     )

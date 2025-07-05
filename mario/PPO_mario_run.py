@@ -28,14 +28,6 @@ model = PPO(
     policy="CnnPolicy",
     env=env,
     verbose=1,
-    tensorboard_log="./logs/",
-    learning_rate=3e-4,
-    n_steps=256,
-    batch_size=2048,
-    n_epochs=10,
-    gamma=0.99,
-    clip_range=0.2,
-    ent_coef=0.01,
 )
 
 # 3. 评估
@@ -44,6 +36,11 @@ done = [False]
 while not done[0]:
     action, _ = model.predict(obs, deterministic=True)
     obs, rewards, done, infos = env.step(action)
+    # import cv2
+    #
+    # print(obs.shape)
+    # cv2.imshow("YourEnv", obs[0][0])
+    # cv2.waitKey(1)
     env.venv.envs[0].render()
     print(rewards)
 
