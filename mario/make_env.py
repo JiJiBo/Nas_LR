@@ -1,8 +1,7 @@
 from typing import Optional
 
-import gym
+import gymnasium as gym
 import numpy as np
-from gym import spaces
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
@@ -28,12 +27,11 @@ class SuperMarioBrosEnv(gym.Env):
         )
         self.env = JoypadSpace(env, SIMPLE_MOVEMENT)
 
-        # 动作空间与原始 env 相同
-        self.action_space = self.env.action_space
+        self.action_space = gym.spaces.discrete.Discrete(self.env.action_space.n)
 
         # 观测空间：取原始像素（H, W, C）
         h, w, c = self.env.observation_space.shape
-        self.observation_space = gym.spaces.Box(
+        self.observation_space = gym.spaces.box.Box(
             low=0, high=255, shape=(h, w, c), dtype=np.uint8
         )
 
