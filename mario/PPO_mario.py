@@ -90,7 +90,7 @@ def train_mario():
     # 检查点 Callback（每 10k 步保存一次）
     checkpoint_cb = CheckpointCallback(
         save_freq=10_000,                      # 每 10000 env step 保存一次
-        save_path="./logs/checkpoints/",       # 保存目录
+        save_path="./logs/checkpoints_10_000/",       # 保存目录
         name_prefix="ppo_mario_checkpoint"     # 文件名前缀
     )
 
