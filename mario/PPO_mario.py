@@ -1,13 +1,16 @@
 import os
-import gym_super_mario_bros
-from nes_py.wrappers import JoypadSpace
-from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack, VecTransposeImage
 
-from mario.make_env import make_mario_env
+from PLE.SB3CompatWrapper import SB3CompatWrapper
+from mario.make_env import SuperMarioBrosEnv
+
+
+def make_mario_env():
+    return SuperMarioBrosEnv()
+
 
 # —— 2. 并行训练环境 ——
 # 创建 8 个实例，并在最外层堆栈 4 帧
