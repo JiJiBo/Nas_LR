@@ -1,4 +1,4 @@
-from mario.PPO_mario import trian_mario
+from mario.PPO_mario import train_mario
 
 if __name__ == '__main__':
-    trian_mario()
+    train_mario()
