@@ -73,7 +73,7 @@ class SuperMarioBrosEnv(gym.Env):
         self.prev_score = current_score
 
         # —— 2) 生存奖励（可选）——
-        survival_reward = 0.0  # 如果需要，可以设置小正奖励
+        survival_reward = -0.001  # 如果需要，可以设置小正奖励
 
         # —— 3) 死亡惩罚 ——
         death_penalty = -10.0 if done else 0.0
