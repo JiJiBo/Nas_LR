@@ -93,7 +93,7 @@ def train_mario():
     rollout_save_freq = 300
     checkpoint_cb = CheckpointCallback(
         save_freq=rollout_save_freq,
-        save_path="./logs/checkpoints_3/",  # 保存目录
+        save_path="../autodl-tmp/checkpoints_3/",  # 保存目录
         name_prefix="ppo_mario_checkpoint"  # 文件名前缀
     )
 
