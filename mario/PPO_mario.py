@@ -42,7 +42,7 @@ def trian_mario():
             tensorboard_log="./logs/",
             learning_rate=2.5e-4,
             n_steps=128,
-            batch_size=512,
+            batch_size=2048*3,
             n_epochs=4,
             gamma=0.99,
             device="cuda",
