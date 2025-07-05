@@ -28,8 +28,10 @@ class SuperMarioBrosEnv(gym.Env):
             apply_api_compatibility=True
         )
         self.env = JoypadSpace(env, SIMPLE_MOVEMENT)
+        self.env = SkipFrame(self.env, 4)
         self.env = GrayScaleObservation(self.env, keep_dim=True)
         self.env = ResizeObservation(self.env, shape=(84, 84))
+
         self.action_space = gym.spaces.discrete.Discrete(self.env.action_space.n)
 
         # 观测空间：取原始像素（H, W, C）
@@ -110,3 +112,19 @@ class SuperMarioBrosEnv(gym.Env):
 
     def close(self):
         self.env.close()
+
+
+class SkipFrame(g.Wrapper):
+    def __init__(self, env, skip: int = 4):
+        super().__init__(env)
+        self.skip = skip
+
+    def step(self, action):
+        total_reward = 0.0
+        for _ in range(self.skip):
+            obs, reward, terminated, truncated, info = self.env.step(action)
+            total_reward += reward
+            done = terminated or truncated
+            if done:
+                break
+        return obs, total_reward, terminated, truncated, info

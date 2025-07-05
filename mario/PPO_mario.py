@@ -3,6 +3,7 @@ import time
 
 from gym.wrappers import GrayScaleObservation
 from stable_baselines3 import PPO
+from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv
 from stable_baselines3.common.callbacks import (
     EvalCallback,
     CheckpointCallback,
@@ -42,9 +43,9 @@ def train_mario():
     # —— 1. 环境准备 ——
     train_env = SubprocVecEnv([make_mario_env for _ in range(36)])
     train_env = VecMonitor(train_env)
+
     train_env = VecFrameStack(train_env, n_stack=4)
     train_env = VecTransposeImage(train_env)
-
     eval_env = DummyVecEnv([make_mario_env])
     eval_env = VecMonitor(eval_env)
     eval_env = VecFrameStack(eval_env, n_stack=4)
