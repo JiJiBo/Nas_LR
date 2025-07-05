@@ -14,7 +14,7 @@ env = VecTransposeImage(env)
 env = VecFrameStack(env, n_stack=4)
 
 # 2. 加载模型时用 custom_objects “挂钩” 无法反序列化的部分
-model_path = "/Users/nas/Downloads/ppo_mario_checkpoint_57600_steps.zip"
+model_path = "/Users/nas/Downloads/ppo_mario_checkpoint_4800_steps.zip"
 custom_objects = {
     # 覆盖空间检测
     "observation_space": env.observation_space,
