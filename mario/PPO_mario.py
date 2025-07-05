@@ -16,6 +16,7 @@ from stable_baselines3.common.vec_env import (
 
 from mario.make_env import SuperMarioBrosEnv
 
+
 class EntropyDecayCallback(BaseCallback):
     def __init__(self, start_coef: float, end_coef: float, decay_steps: int, verbose=0):
         super().__init__(verbose)
@@ -29,9 +30,11 @@ class EntropyDecayCallback(BaseCallback):
         self.model.ent_coef = new_coef
         return True
 
+
 def make_mario_env():
     env = SuperMarioBrosEnv()
     return Monitor(env)
+
 
 def train_mario():
     # —— 1. 环境准备 ——
@@ -87,11 +90,11 @@ def train_mario():
         end_coef=0.005,
         decay_steps=2_000_000
     )
-    # 检查点 Callback（每 10k 步保存一次）
+    rollout_save_freq = 300
     checkpoint_cb = CheckpointCallback(
-        save_freq=10_000,                      # 每 10000 env step 保存一次
-        save_path="./logs/checkpoints_10_000/",       # 保存目录
-        name_prefix="ppo_mario_checkpoint"     # 文件名前缀
+        save_freq=rollout_save_freq,
+        save_path="./logs/checkpoints_3/",  # 保存目录
+        name_prefix="ppo_mario_checkpoint"  # 文件名前缀
     )
 
     # —— 4. 训练 ——
@@ -113,6 +116,7 @@ def train_mario():
         obs, reward, done, info = test_env.step(action)
         test_env.render()
     print("测试结束，最终得分：", info.get("score"))
+
 
 if __name__ == "__main__":
     train_mario()
