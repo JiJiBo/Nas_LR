@@ -13,7 +13,7 @@ def make_mario_env():
 test_env = DummyVecEnv([make_mario_env])
 
 # 3. HWC→CHW
-test_env = VecTransposeImage(test_env)
+# test_env = VecTransposeImage(test_env)
 
 # 4. 堆叠 4 帧
 test_env = VecFrameStack(test_env, n_stack=4)

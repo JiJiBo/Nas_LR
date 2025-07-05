@@ -15,13 +15,14 @@ class SuperMarioBrosEnv(gym.Env):
     观测空间：RGB 原始像素
     奖励：使用游戏实际得分增量
     """
-    metadata = {"render.modes": ["human", "rgb_array"]}
+    # 新写法
+    metadata = {"render_modes": ["human", "rgb_array"]}
 
     def __init__(self, stage='SuperMarioBros-1-1-v0', fps=60):
         super().__init__()
         # 创建原始环境并只保留 SIMPLE_MOVEMENT 动作集
         env = gym_super_mario_bros.make(
-            'SuperMarioBros-1-1-v3',
+            'SuperMarioBros-1-1-v0',
             render_mode='rgb_array',  # 或 'human'
             apply_api_compatibility=True
         )
@@ -32,7 +33,7 @@ class SuperMarioBrosEnv(gym.Env):
 
         # 观测空间：取原始像素（H, W, C）
         h, w, c = self.env.observation_space.shape
-        self.observation_space = spaces.Box(
+        self.observation_space = gym.spaces.Box(
             low=0, high=255, shape=(h, w, c), dtype=np.uint8
         )
 
