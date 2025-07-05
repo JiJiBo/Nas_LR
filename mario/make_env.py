@@ -84,14 +84,15 @@ class SuperMarioBrosEnv(gym.Env):
         # 按 Gym 接口返回 5 元组
         return obs, reward, done, False, info
 
-    def render(self, mode='human'):
-        """
-        human：实时窗口；rgb_array：返回像素数组
-        """
-        if mode == 'human':
-            return self.env.render()
-        elif mode == 'rgb_array':
-            frame = self.env.render()
+    def render(self, mode="human"):
+        # 底层生成一帧图像数组
+        frame = self.env.render()  # 默认返回 rgb_array
+        if mode == "human":
+            # 直接显示
+            import cv2
+            cv2.imshow("YourEnv", frame)
+            cv2.waitKey(1)
+        elif mode == "rgb_array":
             return frame
 
     def close(self):
