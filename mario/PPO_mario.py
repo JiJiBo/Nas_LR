@@ -31,6 +31,7 @@ def trian_mario():
         model = PPO.load(
             model_path,
             env=train_env,
+            device="cuda",
             tensorboard_log="./logs/"
         )
     else:
@@ -44,6 +45,7 @@ def trian_mario():
             batch_size=64,
             n_epochs=4,
             gamma=0.99,
+            device="cuda",
             clip_range=0.1
         )
 
