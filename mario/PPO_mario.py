@@ -64,16 +64,19 @@ def train_mario():
             env=train_env,
             verbose=1,
             tensorboard_log="./logs/",
-            learning_rate=2.5e-4,
-            n_steps=128,
-            batch_size=2048,
-            n_epochs=4,
-            gamma=0.99,
-            clip_range=0.1,
-            ent_coef=0.1,
+            learning_rate=2.5e-4,  # 初始学习率，可配合线性衰减
+            n_steps=128,  # 每个环境 rollout 128 步
+            batch_size=256,  # minibatch 大小
+            n_epochs=4,  # 每次更新迭代 4 个 epoch
+            gamma=0.99,  # 折扣因子
+            gae_lambda=0.95,  # GAE 参数
+            clip_range=0.1,  # PPO 裁剪范围
+            ent_coef=0.01,  # 熵系数，防止过早收敛
+            vf_coef=0.5,  # 价值损失系数
+            max_grad_norm=0.5,  # 梯度裁剪上限
+            target_kl=0.03,  # 达到 KL 上限时提前停止该次更新
             device="cuda",
         )
-
     # —— 3. 各类 Callback ——
     # 评估 Callback（每 100k 步评估一次）
     eval_callback = EvalCallback(
