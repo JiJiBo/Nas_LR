@@ -53,4 +53,4 @@ while not done[0]:
     # VecEnv 没有直接 render，要下钻到第 0 个 env
     test_env.envs[0].render()
     print("测试结束，最终得分：", rewards)
-print("测试结束，最终得分：", infos[0].get("score", None))
+print("测试结束，最终得分：", infos[-1].get("score", None))
