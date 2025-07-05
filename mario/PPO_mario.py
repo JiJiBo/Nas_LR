@@ -46,6 +46,8 @@ def train_mario():
 
     train_env = VecFrameStack(train_env, n_stack=4)
     train_env = VecTransposeImage(train_env)
+
+
     eval_env = DummyVecEnv([make_mario_env])
     eval_env = VecMonitor(eval_env)
     eval_env = VecFrameStack(eval_env, n_stack=4)
@@ -77,7 +79,7 @@ def train_mario():
             clip_range=0.1,  # PPO 裁剪范围
             ent_coef=0.1,  # 熵系数，防止过早收敛
             vf_coef=0.5,  # 价值损失系数
-            max_grad_norm=0.5,  # 梯度裁剪上限
+            max_grad_norm=0.8,  # 梯度裁剪上限
             target_kl=0.03,  # 达到 KL 上限时提前停止该次更新
             device="cuda",
         )
