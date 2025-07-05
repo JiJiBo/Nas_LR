@@ -55,33 +55,43 @@ class SuperMarioBrosEnv(gym.Env):
 
     def step(self, action):
         """
-        执行动作，返回：
-        obs     : (H, W, C) uint8
-        reward  : 得分增量 + （可选生存奖励/死亡惩罚）
-        done    : bool
-        truncated: False （Gym API 兼容）
-        info    : 包含 'score' 和游戏其它信息
+        执行动作，返回 5 元组以兼容新版 Gym：
+        obs        : (H, W, C) uint8
+        reward     : 本步总奖励
+        terminated : bool（本回合是否自然结束，比如到达终点）
+        truncated  : bool（是否被截断，比如超过最大步数）
+        info       : 包含 'score'、'flag_get' 等游戏信息
         """
-        # 新版 step 返回 5 元组
+        # 1) 执行动作
         obs, raw_reward, terminated, truncated, info = self.env.step(action)
+
+        # 2) 计算是否结束
         done = terminated or truncated
 
-        # —— 1) 得分增量奖励 ——
-        # gym_super_mario_bros 的 reward 通常就是得分增量，但也可从 info 取分数
+        # —— 得分增量奖励 ——
         current_score = info.get('score', 0)
         score_reward = current_score - self.prev_score
         self.prev_score = current_score
 
-        # —— 2) 生存奖励（可选）——
-        survival_reward = -0.001  # 如果需要，可以设置小正奖励
+        # —— 生存奖励（可选） ——
+        survival_reward = -0.001  # 也可以用小正值鼓励存活
 
-        # —— 3) 死亡惩罚 ——
-        death_penalty = -10.0 if done else 0.0
+        # —— 死亡惩罚 ——
+        death_penalty = -10.0 if done and info.get('life', 1) == 0 else 0.0
 
-        reward = score_reward + survival_reward + death_penalty
+        # —— 时间惩罚（让 agent 感到紧迫） ——
+        # 每一步扣 0.05 分，步数越多累积扣分越严重
+        time_penalty = -0.05
 
-        # 按 Gym 接口返回 5 元组
-        return obs, reward, done, False, info
+        # —— 通关奖励 ——
+        # info['flag_get'] 为 True 表示到达终点，给一次性大额奖励
+        goal_reward = 100.0 if info.get('flag_get', False) else 0.0
+
+        # —— 汇总所有奖励 ——
+        reward = score_reward + survival_reward + death_penalty + time_penalty + goal_reward
+
+        # 3) 按 Gym API 返回 5 元组
+        return obs, reward, terminated, truncated, info
 
     def render(self, mode="human"):
         # 底层生成一帧图像数组
