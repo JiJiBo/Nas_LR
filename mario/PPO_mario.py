@@ -39,7 +39,7 @@ def train_mario():
             model_path,
             env=train_env,
             device="cuda",
-            batch_size=4096,
+            batch_size=2048,
             tensorboard_log="./logs/"
         )
     else:
@@ -50,7 +50,7 @@ def train_mario():
             tensorboard_log="./logs/",
             learning_rate=3e-4,
             n_steps=256,
-            batch_size=4096,
+            batch_size=2048,
             n_epochs=10,
             gamma=0.99,
             clip_range=0.2,
