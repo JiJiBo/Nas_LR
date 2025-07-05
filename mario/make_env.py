@@ -2,6 +2,7 @@ from typing import Optional
 
 import gymnasium as gym
 import numpy as np
+import gym as g
 import gym_super_mario_bros
 from gym.wrappers import GrayScaleObservation, ResizeObservation
 from nes_py.wrappers import JoypadSpace
@@ -67,33 +68,33 @@ class SuperMarioBrosEnv(gym.Env):
         # 1) 执行动作
         obs, raw_reward, terminated, truncated, info = self.env.step(action)
 
-        # 2) 计算是否结束
-        done = terminated or truncated
-
-        # —— 得分增量奖励 ——
-        current_score = info.get('score', 0)
-        score_reward = current_score - self.prev_score
-        self.prev_score = current_score
-
-        # —— 生存奖励（可选） ——
-        survival_reward = -0.001  # 也可以用小正值鼓励存活
-
-        # —— 死亡惩罚 ——
-        death_penalty = -10.0 if done and info.get('life', 1) == 0 else 0.0
-
-        # —— 时间惩罚（让 agent 感到紧迫） ——
-        # 每一步扣 0.05 分，步数越多累积扣分越严重
-        time_penalty = -0.05
-
-        # —— 通关奖励 ——
-        # info['flag_get'] 为 True 表示到达终点，给一次性大额奖励
-        goal_reward = 100.0 if info.get('flag_get', False) else 0.0
-
-        # —— 汇总所有奖励 ——
-        reward = score_reward + survival_reward + death_penalty + time_penalty + goal_reward
+        # # 2) 计算是否结束
+        # done = terminated or truncated
+        #
+        # # —— 得分增量奖励 ——
+        # current_score = info.get('score', 0)
+        # score_reward = current_score - self.prev_score
+        # self.prev_score = current_score
+        #
+        # # —— 生存奖励（可选） ——
+        # survival_reward = -0.001  # 也可以用小正值鼓励存活
+        #
+        # # —— 死亡惩罚 ——
+        # death_penalty = -10.0 if done and info.get('life', 1) == 0 else 0.0
+        #
+        # # —— 时间惩罚（让 agent 感到紧迫） ——
+        # # 每一步扣 0.05 分，步数越多累积扣分越严重
+        # time_penalty = -0.05
+        #
+        # # —— 通关奖励 ——
+        # # info['flag_get'] 为 True 表示到达终点，给一次性大额奖励
+        # goal_reward = 100.0 if info.get('flag_get', False) else 0.0
+        #
+        # # —— 汇总所有奖励 ——
+        # reward = score_reward + survival_reward + death_penalty + time_penalty + goal_reward
 
         # 3) 按 Gym API 返回 5 元组
-        return obs, reward, terminated, truncated, info
+        return obs, raw_reward, terminated, truncated, info
 
     def render(self, mode="human"):
         # 底层生成一帧图像数组

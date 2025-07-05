@@ -40,7 +40,7 @@ def make_mario_env():
 
 def train_mario():
     # —— 1. 环境准备 ——
-    train_env = DummyVecEnv([make_mario_env for _ in range(16)])
+    train_env = SubprocVecEnv([make_mario_env for _ in range(36)])
     train_env = VecMonitor(train_env)
     train_env = VecFrameStack(train_env, n_stack=4)
     train_env = VecTransposeImage(train_env)
@@ -68,9 +68,9 @@ def train_mario():
             verbose=1,
             tensorboard_log=tensorboard_log,
             learning_rate=2.5e-4,  # 初始学习率，可配合线性衰减
-            n_steps=128,  # 每个环境 rollout 128 步
-            batch_size=256,  # minibatch 大小
-            n_epochs=4,  # 每次更新迭代 4 个 epoch
+            n_steps=2048,  # 每个环境 rollout 128 步
+            batch_size=8192,  # minibatch 大小
+            n_epochs=10,  # 每次更新迭代 4 个 epoch
             gamma=0.95,  # 折扣因子
             gae_lambda=0.95,  # GAE 参数
             clip_range=0.1,  # PPO 裁剪范围
@@ -96,7 +96,7 @@ def train_mario():
         end_coef=0.005,
         decay_steps=2_000_000
     )
-    rollout_save_freq = 3000
+    rollout_save_freq = 3_000_000
     checkpoint_cb = CheckpointCallback(
         save_freq=rollout_save_freq,
         save_path="../autodl-tmp/checkpoints_3/",  # 保存目录
