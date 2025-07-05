@@ -15,7 +15,7 @@ def make_mario_env():
 def trian_mario():
     # —— 2. 并行训练环境 ——
     # 创建 8 个实例，并在最外层堆栈 4 帧
-    train_env = DummyVecEnv([make_mario_env for _ in range(8)])
+    train_env = DummyVecEnv([make_mario_env for _ in range(64)])
     train_env = VecFrameStack(train_env, n_stack=4)
     train_env = VecTransposeImage(train_env)
 
