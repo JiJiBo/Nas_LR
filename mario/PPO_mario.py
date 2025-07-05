@@ -4,7 +4,6 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.vec_env import DummyVecEnv, VecFrameStack, VecTransposeImage
 
-from PLE.SB3CompatWrapper import SB3CompatWrapper
 from mario.make_env import SuperMarioBrosEnv
 
 
@@ -15,7 +14,7 @@ def make_mario_env():
 def trian_mario():
     # —— 2. 并行训练环境 ——
     # 创建 8 个实例，并在最外层堆栈 4 帧
-    train_env = DummyVecEnv([make_mario_env for _ in range(64)])
+    train_env = DummyVecEnv([make_mario_env for _ in range(8)])
     train_env = VecFrameStack(train_env, n_stack=4)
     train_env = VecTransposeImage(train_env)
 
@@ -32,6 +31,7 @@ def trian_mario():
             model_path,
             env=train_env,
             device="cuda",
+            batch_size=512,
             tensorboard_log="./logs/"
         )
     else:
@@ -42,7 +42,7 @@ def trian_mario():
             tensorboard_log="./logs/",
             learning_rate=2.5e-4,
             n_steps=128,
-            batch_size=64,
+            batch_size=512,
             n_epochs=4,
             gamma=0.99,
             device="cuda",
