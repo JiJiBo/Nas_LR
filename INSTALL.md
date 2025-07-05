@@ -24,3 +24,10 @@ sudo pip install -e .
 ```shell
 pip install stable-baselines3[extra]
 ```
+
+#  
+
+```shell
+pip install gym-super-mario-bros==7.3.0
+pip install pyglet==1.5.21
+```
