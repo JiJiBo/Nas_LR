@@ -43,17 +43,16 @@ while not done[0]:
     # cv2.imshow("YourEnv", obs[0][0])
     # cv2.waitKey(1)
     frame = env.venv.envs[0].render(mode="rgb_array")
-    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-
-    frames.append(frame)
-
-
+    # frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
     print(frame.shape)
+    frames.append(frame.copy())
 
-    cv2.imshow("YourEnv", frame)
-    cv2.waitKey(1)
-    print(len(frames))
 
+
+    # cv2.imshow("YourEnv", frame)
+    # cv2.waitKey(1)
+
+print(len(frames))
 # 4. 把帧列表保存成 GIF
 #    fps 参数控制帧率，数值越大，动图播放越快
 imageio.mimsave('episode.gif', frames, fps=30)
