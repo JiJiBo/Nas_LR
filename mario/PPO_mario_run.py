@@ -17,7 +17,7 @@ env = VecTransposeImage(env)
 env = VecFrameStack(env, n_stack=4)
 
 # 2. 加载模型时用 custom_objects “挂钩” 无法反序列化的部分
-model_path = "/Users/nas/Downloads/best_model.zip"
+model_path = "../moldes/best_model_v0.zip"
 custom_objects = {
     # 覆盖空间检测
     "observation_space": env.observation_space,
@@ -44,13 +44,13 @@ while not done[0]:
     # cv2.waitKey(1)
     frame = env.venv.envs[0].render(mode="rgb_array")
     # frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-    print(frame.shape)
+    # print(frame.shape)
     frames.append(frame.copy())
 
 
 
-    # cv2.imshow("YourEnv", frame)
-    # cv2.waitKey(1)
+    cv2.imshow("YourEnv", frame)
+    cv2.waitKey(1)
 
 print(len(frames))
 # 4. 把帧列表保存成 GIF
