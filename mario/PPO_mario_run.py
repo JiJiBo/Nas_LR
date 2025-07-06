@@ -1,6 +1,9 @@
 import os
+
+import imageio
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecTransposeImage, VecFrameStack
+
 from mario.make_env import SuperMarioBrosEnv
 
 
@@ -14,7 +17,7 @@ env = VecTransposeImage(env)
 env = VecFrameStack(env, n_stack=4)
 
 # 2. 加载模型时用 custom_objects “挂钩” 无法反序列化的部分
-model_path = "/Users/nas/Downloads/ppo_mario_checkpoint_388800_steps.zip"
+model_path = "/Users/nas/Downloads/best_model.zip"
 custom_objects = {
     # 覆盖空间检测
     "observation_space": env.observation_space,
@@ -24,24 +27,35 @@ custom_objects = {
     "clip_range": lambda _: 0.2,
 }
 
-model = PPO(
-    policy="CnnPolicy",
-    env=env,
-    verbose=1,
-)
+model = PPO.load(model_path, env=env, custom_objects=custom_objects)
 
 # 3. 评估
+frames = []
 obs = env.reset()
 done = [False]
 while not done[0]:
     action, _ = model.predict(obs, deterministic=True)
     obs, rewards, done, infos = env.step(action)
     # import cv2
+    import cv2
     #
     # print(obs.shape)
     # cv2.imshow("YourEnv", obs[0][0])
     # cv2.waitKey(1)
-    env.venv.envs[0].render()
-    print(rewards)
+    frame = env.venv.envs[0].render(mode="rgb_array")
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+    frames.append(frame)
+
+
+    print(frame.shape)
+
+    cv2.imshow("YourEnv", frame)
+    cv2.waitKey(1)
+    print(len(frames))
+
+# 4. 把帧列表保存成 GIF
+#    fps 参数控制帧率，数值越大，动图播放越快
+imageio.mimsave('episode.gif', frames, fps=30)
 
 print("最终得分：", infos[0].get("score"))
