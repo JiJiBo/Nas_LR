@@ -2,7 +2,7 @@ import os
 
 import imageio
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv, VecTransposeImage, VecFrameStack
+from stable_baselines3.common.vec_env import DummyVecEnv, VecTransposeImage, VecFrameStack, VecMonitor
 
 from mario.make_env import SuperMarioBrosEnv
 
@@ -13,8 +13,10 @@ def make_mario_env():
 
 # 1. 包装环境（和训练时一致）
 env = DummyVecEnv([make_mario_env])
-env = VecTransposeImage(env)
+env = VecMonitor(env)
+
 env = VecFrameStack(env, n_stack=4)
+env = VecTransposeImage(env)
 
 # 2. 加载模型时用 custom_objects “挂钩” 无法反序列化的部分
 model_path = "../moldes/best_v0_model.zip"
@@ -38,6 +40,7 @@ while not done[0]:
     obs, rewards, done, infos = env.step(action)
     # import cv2
     import cv2
+
     #
     # print(obs.shape)
     # cv2.imshow("YourEnv", obs[0][0])
@@ -49,7 +52,7 @@ while not done[0]:
 
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
     cv2.imshow("YourEnv", frame)
-    cv2.waitKey(100)
+    cv2.waitKey(40)
 
 print(len(frames))
 # 4. 把帧列表保存成 GIF
