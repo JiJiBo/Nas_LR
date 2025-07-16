@@ -56,7 +56,7 @@ def make_contra_env():
 
 def train_contra():
     # —— 1. 环境准备 ——
-    train_env = DummyVecEnv([make_contra_env for _ in range(12)])
+    train_env = SubprocVecEnv([make_contra_env for _ in range(24)])
     train_env = VecMonitor(train_env)
 
     train_env = VecFrameStack(train_env, n_stack=4)
@@ -82,27 +82,28 @@ def train_contra():
         model = PPO(
             policy="CnnPolicy",
             env=train_env,
-            verbose=0,
+            verbose=1,
             tensorboard_log=tensorboard_log,
 
-            # —— 学习率与步长相关 ——
-            learning_rate=2.5e-4,  # 建议比你现在用的2.5e-5再高一阶，PPO对lr较鲁棒
-            n_steps=128 * 8,  # 多并行环境时，每个env rollout步数（如8个env共1024步），128~2048都可
-            batch_size=1024,  # 一般设置为n_steps整除项，如1024或2048。不要太大（8192太大了！）
-            n_epochs=4,  # 4-10都行，但太大会过拟合，推荐4
-            gamma=0.99,  # 折扣因子，保持不变
-            gae_lambda=0.95,  # 保持不变
+            # —— 采样与并行相关 ——
+            n_steps=2048,  # 每个环境 rollout 步数，显存足够建议取 2048
+            batch_size=4096,  # 越大越平滑，推荐 2048~8192（显存足够时取4096）
+            n_epochs=8,  # 可适当提高epoch，加快收敛，建议 4~8
+            learning_rate=5e-4,  # 学习率可以略微提高，加速前期收敛，5e-4 或 3e-4
+            gamma=0.99,  # 折扣因子，经典设定
+            gae_lambda=0.95,  # GAE参数，经典设定
 
             # —— PPO核心参数 ——
-            clip_range=0.1,  # 建议0.1，部分最新论文推荐用0.2初始再逐步线性衰减
-            ent_coef=0.01,  # 0.01~0.05，魂斗罗建议探索多一些，不要太高（0.14略高）
-            vf_coef=0.5,  # 保持默认
-            max_grad_norm=0.5,  # 0.5~0.8，建议用0.5
-            target_kl=0.02,  # 0.01~0.03都可，太大不稳定，太小早停太频繁
+            clip_range=0.1,  # 初期 0.1，可随epoch线性衰减至0.05
+            ent_coef=0.02,  # 适当增加探索（0.01~0.05），2D射击类建议 0.02
+            vf_coef=0.5,  # 价值损失系数，默认
+            max_grad_norm=0.5,  # 梯度裁剪，0.5 保守稳定
+            target_kl=0.015,  # KL目标，0.01~0.02，更快响应策略崩溃
 
-            # —— 其他推荐 ——
-            seed=42,  # 固定随机种子，便于复现
+            # —— 多环境并行 ——
+            seed=42,  # 固定随机种子
         )
+
     # —— 3. 各类 Callback ——
     # 评估 Callback（每 100k 步评估一次）
     eval_callback = EvalCallback(
@@ -122,14 +123,14 @@ def train_contra():
     )
 
     custom_checkpoint_cb = CustomCheckpointCallback(
-        save_freq=1000,  # 每100步
+        save_freq=10000,
         save_path="./checkpoints",  # 保存目录
         verbose=0
     )
 
     # —— 4. 训练 ——
     model.learn(
-        total_timesteps=1_000_000,
+        total_timesteps=4_000_000,
         callback=[checkpoint_cb, eval_callback, custom_checkpoint_cb],
         tb_log_name="PPO-contra-16env",
         progress_bar=True
