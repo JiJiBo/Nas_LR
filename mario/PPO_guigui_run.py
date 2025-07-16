@@ -19,18 +19,9 @@ env = VecMonitor(env)
 env = VecFrameStack(env, n_stack=4)
 env = VecTransposeImage(env)
 
-# 2. 加载模型时用 custom_objects “挂钩” 无法反序列化的部分
-model_path = "../checkpoints/model_step_16000.zip"
-custom_objects = {
-    # 覆盖空间检测
-    "observation_space": env.observation_space,
-    "action_space": env.action_space,
-    # 覆盖学习率调度器和剪切范围（用常数或简单 λ）
-    "lr_schedule": lambda _: 3e-4,
-    "clip_range": lambda _: 0.2,
-}
+model_path = "../checkpoints/model_step_2000.zip"
 
-model = PPO.load(model_path, env=env, custom_objects=custom_objects)
+model = PPO.load(model_path, env=env, batch_size=2048 )
 
 # 3. 评估
 frames = []
