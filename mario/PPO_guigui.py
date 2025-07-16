@@ -84,17 +84,24 @@ def train_contra():
             env=train_env,
             verbose=0,
             tensorboard_log=tensorboard_log,
-            learning_rate=2.5e-5,  # 初始学习率，可配合线性衰减
-            n_steps=2048,  # 每个环境 rollout 128 步
-            batch_size=8192,  # minibatch 大小
-            n_epochs=10,  # 每次更新迭代 4 个 epoch
-            gamma=0.99,  # 折扣因子
-            gae_lambda=0.95,  # GAE 参数
-            clip_range=0.1,  # PPO 裁剪范围
-            ent_coef=0.1,  # 熵系数，防止过早收敛
-            vf_coef=0.5,  # 价值损失系数
-            max_grad_norm=0.8,  # 梯度裁剪上限
-            target_kl=0.03,  # 达到 KL 上限时提前停止该次更新
+
+            # —— 学习率与步长相关 ——
+            learning_rate=2.5e-4,  # 建议比你现在用的2.5e-5再高一阶，PPO对lr较鲁棒
+            n_steps=128 * 8,  # 多并行环境时，每个env rollout步数（如8个env共1024步），128~2048都可
+            batch_size=1024,  # 一般设置为n_steps整除项，如1024或2048。不要太大（8192太大了！）
+            n_epochs=4,  # 4-10都行，但太大会过拟合，推荐4
+            gamma=0.99,  # 折扣因子，保持不变
+            gae_lambda=0.95,  # 保持不变
+
+            # —— PPO核心参数 ——
+            clip_range=0.1,  # 建议0.1，部分最新论文推荐用0.2初始再逐步线性衰减
+            ent_coef=0.01,  # 0.01~0.05，魂斗罗建议探索多一些，不要太高（0.14略高）
+            vf_coef=0.5,  # 保持默认
+            max_grad_norm=0.5,  # 0.5~0.8，建议用0.5
+            target_kl=0.02,  # 0.01~0.03都可，太大不稳定，太小早停太频繁
+
+            # —— 其他推荐 ——
+            seed=42,  # 固定随机种子，便于复现
         )
     # —— 3. 各类 Callback ——
     # 评估 Callback（每 100k 步评估一次）
