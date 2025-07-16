@@ -124,8 +124,8 @@ def train_contra():
 
     custom_checkpoint_cb = CustomCheckpointCallback(
         save_freq=10000,
-        save_path="./checkpoints",  # 保存目录
-        verbose=0
+        save_path="./checkpoints_dir",  # 保存目录
+        verbose=1
     )
 
     # —— 4. 训练 ——
