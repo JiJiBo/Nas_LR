@@ -20,7 +20,7 @@ env = VecFrameStack(env, n_stack=4)
 env = VecTransposeImage(env)
 
 # 2. 加载模型时用 custom_objects “挂钩” 无法反序列化的部分
-model_path = "../moldes/best_v0_model.zip"
+model_path = "../checkpoints/model_step_400.zip"
 custom_objects = {
     # 覆盖空间检测
     "observation_space": env.observation_space,

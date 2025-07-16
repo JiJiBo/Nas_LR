@@ -83,7 +83,7 @@ def train_contra():
         model = PPO(
             policy="CnnPolicy",
             env=train_env,
-            verbose=1,
+            verbose=0,
             tensorboard_log=tensorboard_log,
             learning_rate=2.5e-4,  # 初始学习率，可配合线性衰减
             n_steps=2048,  # 每个环境 rollout 128 步
@@ -119,7 +119,7 @@ def train_contra():
     custom_checkpoint_cb = CustomCheckpointCallback(
         save_freq=100,  # 每100步
         save_path="./checkpoints",  # 保存目录
-        verbose=1
+        verbose=0
     )
 
     # —— 4. 训练 ——
