@@ -25,15 +25,9 @@ sudo pip install -e .
 pip install stable-baselines3[extra]
 ```
 
-#  
+#   
 
 ```shell
 pip install gym-super-mario-bros==7.3.0
 pip install pyglet==1.5.21
-```
-```shell
-pip install git+https://github.com/Pataua101/retro.git
-```
-```shell
-retro-import ./rom/
-```
+``` 

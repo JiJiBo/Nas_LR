@@ -70,8 +70,9 @@ def train_contra():
     time_str = time.strftime("%Y%m%d-%H%M%S")
     tensorboard_log = f"./root/tf-logs/time_{time_str}"
     # —— 2. 模型加载或新建 ——
-    model_path = "checkpoints/model_step_8000.zip"
+    model_path = "checkpoints/model_step_30000.zip"
     if os.path.exists(model_path):
+        print("will load",model_path)
         model = PPO.load(
             model_path,
             env=train_env,
@@ -131,7 +132,8 @@ def train_contra():
     model.learn(
         total_timesteps=1_000_000,
         callback=[checkpoint_cb, eval_callback, custom_checkpoint_cb],
-        tb_log_name="PPO-contra-16env"
+        tb_log_name="PPO-contra-16env",
+        progress_bar=True
     )
 
     # —— 5. 保存最终模型 ——

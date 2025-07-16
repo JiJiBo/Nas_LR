@@ -11,12 +11,13 @@ def make_mario_env():
 
 # 1. 包装环境（和训练时一致）
 env = DummyVecEnv([make_mario_env])
+# env = DummyVecEnv([make_mario_env for _ in range(12)])
 env = VecMonitor(env)
 
 env = VecFrameStack(env, n_stack=4)
 env = VecTransposeImage(env)
 
-model_path = "../checkpoints/model_step_1000.zip"
+model_path = "../checkpoints/model_step_5000.zip"
 
 model = PPO.load(model_path, env=env, batch_size=2048)
 
