@@ -21,6 +21,21 @@ from mario.guigui_env import ContraEnv
 from mario.make_env import SuperMarioBrosEnv
 
 
+class CustomCheckpointCallback(BaseCallback):
+    def __init__(self, save_freq: int, save_path: str, verbose=0):
+        super().__init__(verbose)
+        self.save_freq = save_freq
+        self.save_path = save_path
+
+    def _on_step(self) -> bool:
+        if self.n_calls % self.save_freq == 0:
+            model_path = f"{self.save_path}/model_step_{self.n_calls}"
+            self.model.save(model_path)
+            if self.verbose > 0:
+                print(f"模型已保存到 {model_path}")
+        return True
+
+
 class EntropyDecayCallback(BaseCallback):
     def __init__(self, start_coef: float, end_coef: float, decay_steps: int, verbose=0):
         super().__init__(verbose)
@@ -48,13 +63,12 @@ def train_contra():
     train_env = VecFrameStack(train_env, n_stack=4)
     train_env = VecTransposeImage(train_env)
 
-
     eval_env = DummyVecEnv([make_mario_env])
     eval_env = VecMonitor(eval_env)
     eval_env = VecFrameStack(eval_env, n_stack=4)
     eval_env = VecTransposeImage(eval_env)
     time_str = time.strftime("%Y%m%d-%H%M%S")
-    tensorboard_log = f"/root/tf-logs/time_{time_str}"
+    tensorboard_log = f"./root/tf-logs/time_{time_str}"
     # —— 2. 模型加载或新建 ——
     model_path = "./logs/ppo_mario.zip"
     if os.path.exists(model_path):
@@ -94,12 +108,7 @@ def train_contra():
         n_eval_episodes=5,
         deterministic=True
     )
-    # 探索衰减 Callback
-    entropy_decay_cb = EntropyDecayCallback(
-        start_coef=0.1,
-        end_coef=0.005,
-        decay_steps=2_000_000
-    )
+
     rollout_save_freq = 1_000_000
     checkpoint_cb = CheckpointCallback(
         save_freq=rollout_save_freq,
@@ -107,10 +116,16 @@ def train_contra():
         name_prefix="ppo_mario_checkpoint"  # 文件名前缀
     )
 
+    custom_checkpoint_cb = CustomCheckpointCallback(
+        save_freq=100,  # 每100步
+        save_path="./checkpoints",  # 保存目录
+        verbose=1
+    )
+
     # —— 4. 训练 ——
     model.learn(
         total_timesteps=70_000_000,
-        callback=[checkpoint_cb, eval_callback],
+        callback=[checkpoint_cb, eval_callback, custom_checkpoint_cb],
         tb_log_name="PPO-Mario-16env"
     )
 
