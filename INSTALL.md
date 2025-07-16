@@ -30,4 +30,8 @@ pip install stable-baselines3[extra]
 ```shell
 pip install gym-super-mario-bros==7.3.0
 pip install pyglet==1.5.21
+pip install gym-contra
 ``` 
+```shell
+pip install 'numpy<2.0.0'
+```

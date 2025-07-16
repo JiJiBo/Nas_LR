@@ -18,7 +18,6 @@ from stable_baselines3.common.vec_env import (
 )
 
 from mario.guigui_env import ContraEnv
-from mario.make_env import SuperMarioBrosEnv
 
 
 class CustomCheckpointCallback(BaseCallback):
@@ -68,7 +67,7 @@ def train_contra():
     eval_env = VecFrameStack(eval_env, n_stack=4)
     eval_env = VecTransposeImage(eval_env)
     time_str = time.strftime("%Y%m%d-%H%M%S")
-    tensorboard_log = f"./root/tf-logs/time_{time_str}"
+    tensorboard_log = f"/root/tf-logs/time_{time_str}"
     # —— 2. 模型加载或新建 ——
     model_path = "checkpoints/model_step_30000.zip"
     if os.path.exists(model_path):
