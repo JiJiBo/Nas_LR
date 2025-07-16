@@ -27,7 +27,7 @@ class ContraEnv(gym.Env):
         )
         self.env = JoypadSpace(env, SIMPLE_MOVEMENT)
         self.env = SkipFrame(self.env, 4)
-        # self.env = GrayScaleObservation(self.env, keep_dim=True)
+        self.env = GrayScaleObservation(self.env, keep_dim=True)
         self.env = ResizeObservation(self.env, shape=(84, 84))
 
         self.action_space = gym.spaces.discrete.Discrete(self.env.action_space.n)
