@@ -65,7 +65,7 @@ def train_contra():
 
     eval_env = DummyVecEnv([make_contra_env])
     eval_env = VecMonitor(eval_env)
-    eval_env = VecFrameStack(eval_env, n_stack=8)
+    eval_env = VecFrameStack(eval_env, n_stack=4)
     eval_env = VecTransposeImage(eval_env)
     time_str = time.strftime("%Y%m%d-%H%M%S")
     tensorboard_log = f"./root/tf-logs/time_{time_str}"
@@ -88,7 +88,7 @@ def train_contra():
             n_steps=2048,  # 每个环境 rollout 128 步
             batch_size=8192,  # minibatch 大小
             n_epochs=10,  # 每次更新迭代 4 个 epoch
-            gamma=0.95,  # 折扣因子
+            gamma=0.99,  # 折扣因子
             gae_lambda=0.95,  # GAE 参数
             clip_range=0.1,  # PPO 裁剪范围
             ent_coef=0.1,  # 熵系数，防止过早收敛
