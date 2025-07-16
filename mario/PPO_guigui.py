@@ -69,7 +69,7 @@ def train_contra():
     time_str = time.strftime("%Y%m%d-%H%M%S")
     tensorboard_log = f"/root/tf-logs/time_{time_str}"
     # —— 2. 模型加载或新建 ——
-    model_path = "checkpoints/model_step_30000.zip"
+    model_path = "./checkpoints_dir/model_step_60000.zip"
     if os.path.exists(model_path):
         print("will load",model_path)
         model = PPO.load(
@@ -86,20 +86,19 @@ def train_contra():
             tensorboard_log=tensorboard_log,
 
             # —— 采样与并行相关 ——
-            n_steps=2048,  # 每个环境 rollout 步数，显存足够建议取 2048
-            batch_size=4096,  # 越大越平滑，推荐 2048~8192（显存足够时取4096）
-            n_epochs=8,  # 可适当提高epoch，加快收敛，建议 4~8
-            learning_rate=5e-4,  # 学习率可以略微提高，加速前期收敛，5e-4 或 3e-4
             gamma=0.99,  # 折扣因子，经典设定
             gae_lambda=0.95,  # GAE参数，经典设定
 
             # —— PPO核心参数 ——
-            clip_range=0.1,  # 初期 0.1，可随epoch线性衰减至0.05
-            ent_coef=0.02,  # 适当增加探索（0.01~0.05），2D射击类建议 0.02
-            vf_coef=0.5,  # 价值损失系数，默认
             max_grad_norm=0.5,  # 梯度裁剪，0.5 保守稳定
-            target_kl=0.015,  # KL目标，0.01~0.02，更快响应策略崩溃
-
+            clip_range=0.08,
+            target_kl=0.03,
+            learning_rate=2.5e-4,
+            ent_coef=0.01,
+            vf_coef=0.5,
+            n_epochs=4,
+            n_steps=1024,
+            batch_size=1024,
             # —— 多环境并行 ——
             seed=42,  # 固定随机种子
         )

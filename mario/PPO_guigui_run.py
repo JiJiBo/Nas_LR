@@ -17,7 +17,7 @@ env = VecMonitor(env)
 env = VecFrameStack(env, n_stack=4)
 env = VecTransposeImage(env)
 
-model_path = r"C:\Users\12700\Downloads\model_step_20000.zip"
+model_path = r"C:\Users\12700\Downloads\model_step_30000.zip"
 
 model = PPO.load(model_path, env=env, batch_size=2048)
 
