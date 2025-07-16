@@ -57,7 +57,7 @@ def make_contra_env():
 
 def train_contra():
     # —— 1. 环境准备 ——
-    train_env = DummyVecEnv([make_contra_env for _ in range(16)])
+    train_env = DummyVecEnv([make_contra_env for _ in range(12)])
     train_env = VecMonitor(train_env)
 
     train_env = VecFrameStack(train_env, n_stack=4)
@@ -65,12 +65,12 @@ def train_contra():
 
     eval_env = DummyVecEnv([make_contra_env])
     eval_env = VecMonitor(eval_env)
-    eval_env = VecFrameStack(eval_env, n_stack=4)
+    eval_env = VecFrameStack(eval_env, n_stack=8)
     eval_env = VecTransposeImage(eval_env)
     time_str = time.strftime("%Y%m%d-%H%M%S")
     tensorboard_log = f"./root/tf-logs/time_{time_str}"
     # —— 2. 模型加载或新建 ——
-    model_path = "checkpoints/model_step_33000.zip"
+    model_path = "checkpoints/model_step_8000.zip"
     if os.path.exists(model_path):
         model = PPO.load(
             model_path,
@@ -84,17 +84,17 @@ def train_contra():
             env=train_env,
             verbose=0,
             tensorboard_log=tensorboard_log,
-            learning_rate=2.5e-4,  # 初始学习率，可配合线性衰减
-            # n_steps=2048,  # 每个环境 rollout 128 步
+            learning_rate=2.5e-5,  # 初始学习率，可配合线性衰减
+            n_steps=2048,  # 每个环境 rollout 128 步
             batch_size=8192,  # minibatch 大小
             n_epochs=10,  # 每次更新迭代 4 个 epoch
-            # gamma=0.95,  # 折扣因子
-            # gae_lambda=0.95,  # GAE 参数
-            # clip_range=0.1,  # PPO 裁剪范围
-            # ent_coef=0.1,  # 熵系数，防止过早收敛
-            # vf_coef=0.5,  # 价值损失系数
-            # max_grad_norm=0.8,  # 梯度裁剪上限
-            # target_kl=0.03,  # 达到 KL 上限时提前停止该次更新
+            gamma=0.95,  # 折扣因子
+            gae_lambda=0.95,  # GAE 参数
+            clip_range=0.1,  # PPO 裁剪范围
+            ent_coef=0.1,  # 熵系数，防止过早收敛
+            vf_coef=0.5,  # 价值损失系数
+            max_grad_norm=0.8,  # 梯度裁剪上限
+            target_kl=0.03,  # 达到 KL 上限时提前停止该次更新
         )
     # —— 3. 各类 Callback ——
     # 评估 Callback（每 100k 步评估一次）
@@ -107,7 +107,7 @@ def train_contra():
         deterministic=True
     )
 
-    rollout_save_freq = 1_00_000
+    rollout_save_freq = 100_000
     checkpoint_cb = CheckpointCallback(
         save_freq=rollout_save_freq,
         save_path="../autodl-tmp/checkpoints_3/",  # 保存目录
