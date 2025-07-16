@@ -117,14 +117,14 @@ def train_contra():
     )
 
     custom_checkpoint_cb = CustomCheckpointCallback(
-        save_freq=100,  # 每100步
+        save_freq=1000,  # 每100步
         save_path="./checkpoints",  # 保存目录
         verbose=0
     )
 
     # —— 4. 训练 ——
     model.learn(
-        total_timesteps=70_000_000,
+        total_timesteps=1_000_000,
         callback=[checkpoint_cb, eval_callback, custom_checkpoint_cb],
         tb_log_name="PPO-Mario-16env"
     )
