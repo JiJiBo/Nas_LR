@@ -40,9 +40,9 @@ def make_mario_env():
     return Monitor(env)
 
 
-def train_mario():
+def train_contra():
     # —— 1. 环境准备 ——
-    train_env = SubprocVecEnv([make_mario_env for _ in range(36)])
+    train_env = DummyVecEnv([make_mario_env for _ in range(16)])
     train_env = VecMonitor(train_env)
 
     train_env = VecFrameStack(train_env, n_stack=4)
@@ -129,4 +129,4 @@ def train_mario():
 
 
 if __name__ == "__main__":
-    train_mario()
+    train_contra()
