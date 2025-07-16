@@ -109,7 +109,7 @@ def train_contra():
         deterministic=True
     )
 
-    rollout_save_freq = 1_000_000
+    rollout_save_freq = 1_00_000
     checkpoint_cb = CheckpointCallback(
         save_freq=rollout_save_freq,
         save_path="../autodl-tmp/checkpoints_3/",  # 保存目录

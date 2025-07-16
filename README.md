@@ -14,6 +14,6 @@ tensorboard --logdir mario/logs/PPO-Mario_7
 ```shell
 
 
-tensorboard --logdir logs/PPO-Mario_6
+tensorboard --logdir ./root/tf-logs
 
 ```
