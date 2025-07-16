@@ -50,32 +50,31 @@ class EntropyDecayCallback(BaseCallback):
         return True
 
 
-def make_mario_env():
+def make_contra_env():
     env = ContraEnv()
     return Monitor(env)
 
 
 def train_contra():
     # —— 1. 环境准备 ——
-    train_env = DummyVecEnv([make_mario_env for _ in range(16)])
+    train_env = DummyVecEnv([make_contra_env for _ in range(16)])
     train_env = VecMonitor(train_env)
 
     train_env = VecFrameStack(train_env, n_stack=4)
     train_env = VecTransposeImage(train_env)
 
-    eval_env = DummyVecEnv([make_mario_env])
+    eval_env = DummyVecEnv([make_contra_env])
     eval_env = VecMonitor(eval_env)
     eval_env = VecFrameStack(eval_env, n_stack=4)
     eval_env = VecTransposeImage(eval_env)
     time_str = time.strftime("%Y%m%d-%H%M%S")
     tensorboard_log = f"./root/tf-logs/time_{time_str}"
     # —— 2. 模型加载或新建 ——
-    model_path = "./logs/ppo_mario.zip"
+    model_path = "checkpoints/model_step_10000.zip"
     if os.path.exists(model_path):
         model = PPO.load(
             model_path,
             env=train_env,
-            device="cuda",
             batch_size=2048,
             tensorboard_log=tensorboard_log
         )
@@ -96,7 +95,6 @@ def train_contra():
             vf_coef=0.5,  # 价值损失系数
             max_grad_norm=0.8,  # 梯度裁剪上限
             target_kl=0.03,  # 达到 KL 上限时提前停止该次更新
-            device="cuda",
         )
     # —— 3. 各类 Callback ——
     # 评估 Callback（每 100k 步评估一次）
@@ -113,7 +111,7 @@ def train_contra():
     checkpoint_cb = CheckpointCallback(
         save_freq=rollout_save_freq,
         save_path="../autodl-tmp/checkpoints_3/",  # 保存目录
-        name_prefix="ppo_mario_checkpoint"  # 文件名前缀
+        name_prefix="ppo_contra_checkpoint"  # 文件名前缀
     )
 
     custom_checkpoint_cb = CustomCheckpointCallback(
@@ -126,14 +124,14 @@ def train_contra():
     model.learn(
         total_timesteps=1_000_000,
         callback=[checkpoint_cb, eval_callback, custom_checkpoint_cb],
-        tb_log_name="PPO-Mario-16env"
+        tb_log_name="PPO-contra-16env"
     )
 
     # —— 5. 保存最终模型 ——
     model.save(model_path)
 
     # —— 6. 测试 ——
-    test_env = SuperMarioBrosEnv()
+    test_env = ContraEnv()
     obs = test_env.reset()
     done = False
     while not done:
