@@ -1,7 +1,7 @@
 import platform
 import random
 import matplotlib.pyplot as plt
-from collections import Counter
+from collections import Counter, OrderedDict
 import matplotlib
 
 # 设置中文字体，根据平台自动选择合适字体
@@ -50,14 +50,15 @@ hour = 9
 state_at_hour = [traj[hour] for traj in all_trajectories]
 counter = Counter(state_at_hour)
 
-# 6. 可视化结果
-plt.bar(counter.keys(), counter.values(), color='skyblue')
+# 6. 可视化结果（横轴排序）
+ordered_counter = OrderedDict((state, counter.get(state, 0)) for state in states)
+
+plt.bar(ordered_counter.keys(), ordered_counter.values(), color='skyblue')
 plt.title(f"第{hour + 1}小时状态分布 (共{n_simulations}天)")
 plt.xlabel("状态")
 plt.ylabel("频数")
 plt.grid(True, linestyle='--', alpha=0.5)
 plt.tight_layout()
 plt.show()
-
 # 7. 可选：输出一条完整轨迹
 print("示例一天轨迹：", ' → '.join(simulate_day()))
