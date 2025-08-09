@@ -113,3 +113,30 @@ class GomokuBoard:
             y, x = self.last_move
             last[y, x] = 1.0
         return np.stack([me, opp, empty, last], axis=0).astype(np.float32)
+
+    def copy(self):
+        new_board = GomokuBoard(self.size, self.count_win)
+        new_board.board = self.board.copy()
+        new_board.move_count = self.move_count
+        return new_board
+
+    def is_win(self, player_flag):
+        """检查某个玩家是否获胜"""
+        directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
+        for y in range(self.size):
+            for x in range(self.size):
+                if self.board[y, x] != player_flag:
+                    continue
+                for dy, dx in directions:
+                    count = 1
+                    ny, nx = y + dy, x + dx
+                    while 0 <= ny < self.size and 0 <= nx < self.size and self.board[ny, nx] == player_flag:
+                        count += 1
+                        if count >= self.count_win:
+                            return True
+                        ny += dy
+                        nx += dx
+        return False
+
+    def is_full(self):
+        return self.move_count >= self.size * self.size
