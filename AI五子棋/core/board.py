@@ -1,22 +1,31 @@
 import numpy as np
 
+
 class GomokuBoard:
     def __init__(self, size=15, count_win=5):
         self.size = size
         self.count_win = count_win
         self.board = np.zeros((size, size), dtype=np.int8)  # -1, 0, +1
         self.move_count = 0
+        self.last_move = None
+        self.history = []  # [(y,x,player_flag)]
 
     def reset(self):
         self.board.fill(0)
         self.move_count = 0
+        self.last_move = None
+        self.history.clear()
 
     def legal_moves(self):
-        # 返回所有空位 (y, x)
         ys, xs = np.where(self.board == 0)
         return list(zip(ys.tolist(), xs.tolist()))
 
-    def step(self, move, player_flag):
+    def legal_mask(self, flat=True):
+        m = (self.board == 0).astype(np.float32)
+        return m.reshape(-1) if flat else m
+
+    def step(self, move, player_flag, return_info: bool = False):
+        """默认兼容旧返回；若 return_info=True，返回 (board, winner, done)"""
         y, x = move
         if player_flag not in (-1, 1):
             raise ValueError("player_flag must be +1 (Black) or -1 (White).")
@@ -24,48 +33,83 @@ class GomokuBoard:
             raise ValueError("move out of board.")
         if self.board[y, x] != 0:
             raise ValueError("illegal move: cell occupied.")
+
         self.board[y, x] = player_flag
         self.move_count += 1
-        return self.board, player_flag
+        self.last_move = (y, x)
+        self.history.append((y, x, player_flag))
+
+        w = self.winner_from_last()
+        done = (w != 0) or (self.move_count == self.size * self.size)
+
+        if return_info:
+            return self.board, w, done
+        else:
+            # 兼容你之前的用法
+            return self.board, player_flag
+
+    def undo(self):
+        """回退一步；若无步可退则抛错"""
+        if not self.history:
+            raise RuntimeError("no move to undo")
+        y, x, _ = self.history.pop()
+        self.board[y, x] = 0
+        self.move_count -= 1
+        self.last_move = (self.history[-1][0], self.history[-1][1]) if self.history else None
 
     def is_terminal(self):
-        # 终局：一方胜，或棋满
-        return self.winner() != 0 or self.move_count == self.size * self.size
+        return self.winner_from_last() != 0 or self.move_count == self.size * self.size
 
     def play_count(self):
         return self.move_count
 
     def winner(self):
-        """
-        返回 1（先手/黑胜），-1（后手/白胜），0（未分胜负或和棋）。
-        注意：这里不做禁手判定；需要禁手的话，放到 legal_moves 过滤或单独规则里。
-        """
+        """1(黑胜)/-1(白胜)/0(未分胜负或和棋)"""
+        if self.move_count == self.size * self.size and self.winner_from_last() == 0:
+            return 0  # 和棋 or 未分胜负（交由外部 is_terminal 判断）
+        return self.winner_from_last()
+
+    # ---- 仅检查上一手，O(K) ----
+    def winner_from_last(self):
+        if self.last_move is None:
+            return 0
+        y0, x0 = self.last_move
+        p = self.board[y0, x0]
+        if p == 0:
+            return 0
+        K = self.count_win
         s = self.size
         b = self.board
-        K = self.count_win
-
-        # 四个方向：水平(0,1)，竖直(1,0)，斜下(1,1)，斜上(-1,1)
-        dirs = [(0, 1), (1, 0), (1, 1), (-1, 1)]
-
-        for y in range(s):
-            for x in range(s):
-                p = b[y, x]
-                if p == 0:
-                    continue
-                for dy, dx in dirs:
-                    # 起点往反方向退一步避免重复计数（只从“线段最左/最上端”开始数）
-                    py, px = y - dy, x - dx
-                    if 0 <= py < s and 0 <= px < s and b[py, px] == p:
-                        continue
-
-                    # 向 (dy, dx) 数连续同色子
-                    cnt = 0
-                    ny, nx = y, x
-                    while 0 <= ny < s and 0 <= nx < s and b[ny, nx] == p:
-                        cnt += 1
-                        if cnt >= K:
-                            return int(p)  # 胜者
-                        ny += dy
-                        nx += dx
-        # 没有连五即未分胜负（也可能和棋，但和棋由外部 “棋满” 判定）
+        for dy, dx in ((0, 1), (1, 0), (1, 1), (-1, 1)):
+            cnt = 1
+            # 向两侧延伸
+            for sy in (-1, 1):
+                y, x = y0 + sy * dy, x0 + sy * dx
+                while 0 <= y < s and 0 <= x < s and b[y, x] == p:
+                    cnt += 1
+                    if cnt >= K:
+                        return int(p)
+                    y += sy * dy
+                    x += sy * dx
         return 0
+
+    # ---- 4通道特征 ----
+    def get_planes_4ch(self, current_player: int):
+        """
+        [4,H,W]:
+          0 我方(相对 current_player) 1/0
+          1 对方 1/0
+          2 空白 1/0
+          3 上一步 one-hot
+        """
+        if current_player not in (-1, 1):
+            raise ValueError("current_player must be +1 or -1")
+        b = self.board
+        me = (b == current_player).astype(np.float32)
+        opp = (b == -current_player).astype(np.float32)
+        empty = (b == 0).astype(np.float32)
+        last = np.zeros_like(b, dtype=np.float32)
+        if self.last_move is not None:
+            y, x = self.last_move
+            last[y, x] = 1.0
+        return np.stack([me, opp, empty, last], axis=0).astype(np.float32)
