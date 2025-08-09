@@ -18,7 +18,7 @@ class MCTS():
         self.c_puct = c_puct
         self.visit_nodes = []
 
-    def run(self, root_board: GomokuBoard, number_samples=100):
+    def run(self, root_board: GomokuBoard, number_samples=100, is_train=False):
         root_node = MCTSNode(root_board, player=1)
         self.visit_nodes.append(root_node)
         for si in range(number_samples):
@@ -36,9 +36,9 @@ class MCTS():
                 node.visit_count += 1
                 node.prior_prob = prior_prob
                 prior_prob = -prior_prob
-        return self.get_result(root_node)
+        return self.get_result(root_node, is_train)
 
-    def get_result(self, root_node: MCTSNode):
+    def get_result(self, root_node: MCTSNode, is_train):
         pass
 
     def select_child(self, node: MCTSNode):
