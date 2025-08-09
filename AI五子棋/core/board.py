@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 
 
@@ -116,7 +118,7 @@ class GomokuBoard:
 
     def copy(self):
         new_board = GomokuBoard(self.size, self.count_win)
-        new_board.board = self.board.copy()
+        new_board.board = copy.deepcopy(self.board)
         new_board.move_count = self.move_count
         return new_board
 
@@ -143,28 +145,27 @@ class GomokuBoard:
 
     def evaluation(self):
         board_size = self.size
-        num_used = 0
-        for i in range(0, board_size):
-            for j in range(0, board_size):
-                if self.board[i][j] != 0:
-                    num_used += 1
-        for i in range(0, board_size):
-            for j in range(0, board_size):
-                if self.board[i][j] != 0:
-                    for (x, y) in [(0, 1), (1, 0), (1, 1), (1, -1)]:
-                        cnt = 0
-                        for d in range(0, 5):
-                            ni = i + d * x
-                            nj = j + d * y
-                            if 0 <= ni and ni < board_size and 0 <= nj and nj < board_size and self.board[i][j] == \
-                                    self.board[ni][
-                                        nj]:
-                                cnt += 1
-                            else:
-                                break
-                        if cnt == 5:
-                            if self.board[i][j] == 1:
-                                return (1 - num_used * 3e-4)
-                            else:
-                                return -(1 - num_used * 3e-4)
+        # 已下子数，用于早赢奖励（和你原逻辑一致）
+        num_used = int((self.board != 0).sum())
+
+        # 四个方向：水平、垂直、主对角、反对角
+        directions = [(0, 1), (1, 0), (1, 1), (1, -1)]
+
+        for y in range(board_size):
+            for x in range(board_size):
+                p = self.board[y][x]
+                if p == 0:
+                    continue
+                for dy, dx in directions:
+                    cnt = 0
+                    for d in range(5):
+                        ny = y + d * dy
+                        nx = x + d * dx
+                        if 0 <= ny < board_size and 0 <= nx < board_size and self.board[ny][nx] == p:
+                            cnt += 1
+                        else:
+                            break
+                    if cnt == 5:
+                        score = (1 - num_used * 3e-4)
+                        return score if p == 1 else -score
         return 0

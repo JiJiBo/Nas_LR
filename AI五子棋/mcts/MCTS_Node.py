@@ -1,4 +1,15 @@
+from dataclasses import dataclass
+from typing import Optional, Dict, Tuple
+
 from AI五子棋.core.board import GomokuBoard
+
+Move = Tuple[int, int]
+
+
+@dataclass
+class Edge:
+    child: Optional['MCTSNode',None]
+    prior: float
 
 
 class MCTSNode:
@@ -7,7 +18,7 @@ class MCTSNode:
         self.player = player  # 当前执棋方
         self.move = move  # 父节点走到此节点的着法
         self.parent = parent
-        self.children = {}  # move -> MCTSNode
+        self.children: Dict[Move, Edge] = {}  # move -> MCTSNode
 
         # MCTS 统计
         self.visit_count = 0  # N
