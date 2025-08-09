@@ -140,3 +140,31 @@ class GomokuBoard:
 
     def is_full(self):
         return self.move_count >= self.size * self.size
+
+    def evaluation(self):
+        board_size = self.size
+        num_used = 0
+        for i in range(0, board_size):
+            for j in range(0, board_size):
+                if self.board[i][j] != 0:
+                    num_used += 1
+        for i in range(0, board_size):
+            for j in range(0, board_size):
+                if self.board[i][j] != 0:
+                    for (x, y) in [(0, 1), (1, 0), (1, 1), (1, -1)]:
+                        cnt = 0
+                        for d in range(0, 5):
+                            ni = i + d * x
+                            nj = j + d * y
+                            if 0 <= ni and ni < board_size and 0 <= nj and nj < board_size and self.board[i][j] == \
+                                    self.board[ni][
+                                        nj]:
+                                cnt += 1
+                            else:
+                                break
+                        if cnt == 5:
+                            if self.board[i][j] == 1:
+                                return (1 - num_used * 3e-4)
+                            else:
+                                return -(1 - num_used * 3e-4)
+        return 0
