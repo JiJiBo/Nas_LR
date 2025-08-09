@@ -1,5 +1,8 @@
+from AI五子棋.core.board import GomokuBoard
+
+
 class MCTSNode:
-    def __init__(self, board, player, move=None, parent=None, prior_prob=1.0):
+    def __init__(self, board: GomokuBoard, player: int, move=None, parent=None, prior_prob=1.0):
         self.board = board  # 当前棋盘
         self.player = player  # 当前执棋方
         self.move = move  # 父节点走到此节点的着法
@@ -7,8 +10,8 @@ class MCTSNode:
         self.children = {}  # move -> MCTSNode
 
         # MCTS 统计
-        self.visit_count = 0   # N
-        self.total_value = 0.0 # W
+        self.visit_count = 0  # N
+        self.total_value = 0.0  # W
         self.prior_prob = prior_prob  # P
 
         # 还没探索过的走法（合法空位）
@@ -16,7 +19,7 @@ class MCTSNode:
 
         # 是否终局
         self.is_terminal = (
-            board.is_win(1) or board.is_win(-1) or board.is_full()
+                board.is_win(1) or board.is_win(-1) or board.is_full()
         )
 
     def q_value(self):
@@ -30,5 +33,5 @@ class MCTSNode:
         if self.parent is None:
             return 0
         return c_puct * self.prior_prob * (
-            (self.parent.visit_count ** 0.5) / (1 + self.visit_count)
+                (self.parent.visit_count ** 0.5) / (1 + self.visit_count)
         )
