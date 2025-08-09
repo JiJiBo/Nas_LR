@@ -10,8 +10,8 @@ class MCTS():
     def run(self):
         pass
 
-    def select_child(self, state):
+    def select_child(self, node):
         pass
 
-    def expand_node(self, state):
+    def expand_node(self, node):
         pass
